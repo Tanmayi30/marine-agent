@@ -12,12 +12,28 @@ import RoutesPage from "./pages/operations/RoutesPage";
 import GeofencePage from "./pages/operations/GeofencePage";
 import ReportsPage from "./pages/reports/ReportsPage";
 
+const DEFAULT_PLANNER = {
+  id: "planner",
+  name: "Agent",
+  title: "Agent",
+  role: "Orchestrator",
+  description: "Orchestrates workflows and assigns tasks to specialized agents.",
+  status: "Systems Online",
+};
+
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
-  const [activeAgent, setActiveAgent] = useState(null);
+  const [activeAgent, setActiveAgent] = useState(DEFAULT_PLANNER);
 
-  const navigate = (page) => setCurrentPage(page);
+  const navigate = (page) => {
+    if (page === "agents" || page === "agent-chat") {
+      setActiveAgent(DEFAULT_PLANNER);
+      setCurrentPage("agent-chat");
+      return;
+    }
+    setCurrentPage(page);
+  };
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
@@ -28,26 +44,11 @@ export default function App() {
       case "dashboard":
         return <DashboardPage navigate={navigate} />;
       case "agents":
-        return (
-          <AgentsPage
-            openAgent={(agent) => {
-              setActiveAgent(agent);
-              navigate("agent-chat");
-            }}
-          />
-        );
       case "agent-chat":
-        return activeAgent ? (
+        return (
           <AgentChatPage
-            agent={activeAgent}
-            back={() => navigate("agents")}
-          />
-        ) : (
-          <AgentsPage
-            openAgent={(agent) => {
-              setActiveAgent(agent);
-              navigate("agent-chat");
-            }}
+            agent={activeAgent || DEFAULT_PLANNER}
+            back={() => navigate("dashboard")}
           />
         );
       case "map":
